@@ -1,5 +1,13 @@
+param (
+  [String]$localPath
+)
+
+if (!$localPath) {
+  $localPath = "."
+}
+
 try {
-  $cred = Import-Clixml -Path ".\Credentials_$($env:USERNAME)_$($env:COMPUTERNAME).xml" -ErrorAction Stop -ErrorVariable $credentialError
+  $cred = Import-Clixml -Path "$($localpath)\Credentials_$($env:USERNAME)_$($env:COMPUTERNAME).xml" -ErrorAction Stop -ErrorVariable $credentialError
 }
 catch {
   Write-host "Error getting Credential file"
