@@ -10,7 +10,7 @@ param (
 
 # check if the localPath variable is given, if not just use the default
 if (!$localPath) {
-  $localPath = "C:\Cleanup-dgi"
+  $localPath = "C:\Cleanup"
 }
 
 # check if the sharepath is given, if not then ask for it
@@ -30,7 +30,7 @@ Write-Host "`nChecking folder and copying file"
 try {
   $folder = Get-ChildItem -Path $localPath -Force -ErrorAction SilentlyContinue
   if (!$folder) {
-    New-Item -Path "C:\" -Name "Cleanup-dgi" -ItemType Directory
+    New-Item -Path ("$($localPath.Split('\')[0])\") -Name ($localPath.Split('\')[1]) -ItemType Directory
     Copy-Item -Path ".\cleanup.ps1" -Destination $localPath
   }
   else {
@@ -66,7 +66,7 @@ try {
     -Trigger $trigger `
     -Settings $settings
   Register-ScheduledTask `
-    -TaskName "cleanup-dgi" `
+    -TaskName "cleanup" `
     -InputObject $task `
     -User "NT AUTHORITY\SYSTEM" `
     -RunLevel 'Highest' `
