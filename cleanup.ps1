@@ -21,7 +21,6 @@ catch {
 }
 
 $uri = "https://cleanup.dgi.no/fetch/$($env:COMPUTERNAME)"
-$deleteUri = "https://cleanup.dgi.no/deleteone/"
 
 $result = Invoke-RestMethod -Uri $uri -Credential $cred
 if ($result -eq "No data") {
@@ -35,9 +34,7 @@ $result | ForEach-Object {
     break
   }
   else {
-    $user = $_.username
-    $deleteBody = @{"username" = "$($_.username)"; "serverName" = "$($env:COMPUTERNAME)"}
-        
+    $user = $_.username    
     $folders = Get-ChildItem -Path $path -Force | Where-Object { $($_.Name) -like "$($user).AD*" }
     if (($folders) -and ($folders.Length -gt 0)) {
       try {
@@ -50,11 +47,10 @@ $result | ForEach-Object {
       }
     }
     try {
+      $deleteUri = "https://cleanup.dgi.no/deleteone/$($env:COMPUTERNAME)/$($user)"
       Invoke-RestMethod `
         -Method "DELETE" `
         -Uri $deleteUri `
-        -Body ($deleteBody|ConvertTo-Json) `
-        -ContentType "application/json" `
         -Credential $cred `
         -ErrorAction Stop `
         -ErrorVariable $restError
