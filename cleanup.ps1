@@ -34,7 +34,7 @@ $result | ForEach-Object {
     break
   }
   else {
-    $user = $_.username    
+    $user = $_.username
     $folders = Get-ChildItem -Path $path -Force | Where-Object { $($_.Name) -like "$($user).AD*" }
     if (($folders) -and ($folders.Length -gt 0)) {
       try {
