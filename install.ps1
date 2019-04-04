@@ -2,7 +2,8 @@ param (
   [String]$localPath,
   [String]$sharePath,
   [String]$aUser,
-  [String]$aPass
+  [String]$aPass,
+  [String]$apiURL
 )
 # this script is for installing a new server into the solution
 # run this with the user that is intended to run the cleanup script
@@ -16,6 +17,10 @@ if (!$localPath) {
 # check if the sharepath is given, if not then ask for it
 if (!$sharePath) {
   $sharePath = Read-Host "input share path for the cleanup script"
+}
+
+if (!$apiURL) {
+  $apiURL = Read-Host "Input API URL"
 }
 
 # check if the api user credentials are given
@@ -42,6 +47,24 @@ try {
 }
 catch {
   Write-Host "caught error while moving script"
+  Write-Host $Error
+}
+
+# create a config file with the given data
+Write-Host "`nCreating config file"
+try {
+  $config = @{
+    URL = $apiURL
+    Share = $sharePath
+  }
+  $file = Get-ChildItem -Path $localPath | Where-Object { $_.Name -eq "config" }
+  if (!$file) {
+    Out-File -FilePath "$($localPath)\config.psd1" -InputObject $config
+    Write-Host "Created config file: $($localPath)\config.psd1"
+  }
+}
+catch {
+  Write-Host "caught error while saving config"
   Write-Host $Error
 }
 
