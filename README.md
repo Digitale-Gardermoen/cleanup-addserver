@@ -18,6 +18,8 @@ When the script is ran as is, it will ask for a few parameters before it install
   - This is the API user used to authenticate when requesting from the API
 - `Required`  aPass
   - This is the secret for the API.
+- `Required`  apiURL
+  - The URL for the API, this is used together with the final script.
 - _Optinonal_ localPath
   - If you want the script to be installed in another location rather than `C:\Cleanup` you can set this to the path you want.
 
@@ -43,7 +45,7 @@ Change any of these to fit your needs.
 
 ## How it works ##
 
-When ran, the script will create a folder in the `$localPath` location, this is `C:\Cleanup` by default. If the folder exists it will skip to it and check if the cleanup script exists. Then copy the script from the current working directory to the new direcotry.
+When ran, the script will create a folder in the `$localPath` location, this is `C:\Cleanup` by default. If the folder exists it will skip to it and check if the cleanup script exists. Then copy the script from the current working directory to the new direcotry. The script will also create a config file based on the parameters you give it. This file includes the URL and the share.
 
 Then it will create the credential file needed for doing API requests, this is installed together with the `cleanup.ps1` script. The file is named in this way: `Credentials_USERNAME_COMPUTERNAME.xml`. This is because of the way powershell creates and stores securestrings, this way you know what user created the creadential on which server.
 
