@@ -31,7 +31,7 @@ if ((!$aUser) -or (!$aPass)) {
 }
 
 # move files to a new folder located on the root
-Write-Host "`nChecking folder and copying file"
+Write-Host "Checking folder and copying file"
 try {
   $folder = Get-ChildItem -Path $localPath -Force -ErrorAction SilentlyContinue
   if (!$folder) {
@@ -51,16 +51,16 @@ catch {
 }
 
 # create a config file with the given data
-Write-Host "`nCreating config file"
+Write-Host "Creating config file"
 try {
   $config = @{
-    URL = $apiURL
-    Share = $sharePath
+    url = $apiURL
+    share = $sharePath
   }
   $file = Get-ChildItem -Path $localPath | Where-Object { $_.Name -eq "config" }
   if (!$file) {
-    Out-File -FilePath "$($localPath)\config.psd1" -InputObject $config
-    Write-Host "Created config file: $($localPath)\config.psd1"
+    $config | ConvertTo-Json | Out-File -FilePath "$($localPath)\config.json"
+    Write-Host "Created config file: $($localPath)\config.json"
   }
 }
 catch {
@@ -69,17 +69,17 @@ catch {
 }
 
 # create credentials for contacting the API
-Write-Host "`nCreating credentials"
+Write-Host "Creating credentials"
 .\createCredentials.ps1 -localPath $localPath -username $aUser -secret $aPass
 
 # add the server to the API
-Write-Host "`nAdding server to the API"
+Write-Host "Adding server to the API"
 .\newServer.ps1 -localPath $localPath
 
 # create a scehduled task that runs the cleanup script
-Write-Host "`ncreating scheduled task"
+Write-Host "creating scheduled task"
 try {
-  $action = New-ScheduledTaskAction -Execute "Powershell.exe" -Argument "$($localPath)\cleanup.ps1 -path $($sharePath) -ExecutionPolicy Bypass"
+  $action = New-ScheduledTaskAction -Execute "Powershell.exe" -Argument "$($localPath)\cleanup.ps1 -ExecutionPolicy Bypass"
   $trigger = New-ScheduledTaskTrigger -Daily -At '01:00' # this is currently hardcoded as i dont want to create a function that checks the wanted trigger
   $principal = New-ScheduledTaskPrincipal "$($env:USERDOMAIN)\$($env:USERNAME)"
   $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 1)
@@ -95,7 +95,7 @@ try {
     -RunLevel 'Highest' `
     -Force `
     -ErrorAction Stop `
-    -ErrorVariable $taskerror
+    -ErrorVariable taskerror
 }
 catch {
   Write-Host "caught error while setting up task"
