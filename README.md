@@ -38,14 +38,14 @@ Register-ScheduledTask `
   -RunLevel 'Highest' `
   -Force `
   -ErrorAction Stop `
-  -ErrorVariable $taskerror
+  -ErrorVariable taskerror
 ```
 
 Change any of these to fit your needs.
 
 ## How it works ##
 
-When ran, the script will create a folder in the `$localPath` location, this is `C:\Cleanup` by default. If the folder exists it will skip to it and check if the cleanup script exists. Then copy the script from the current working directory to the new direcotry. The script will also create a config file based on the parameters you give it. This file includes the URL and the share.
+When ran, the script will create a folder in the `$localPath` location, this is `C:\Cleanup` by default. If the folder exists it will skip to it and check if the cleanup script exists. Then copy the script from the current working directory to the new direcotry. The script will also create a config file based on the parameters you give it. This file includes the URL and the share path.
 
 Then it will create the credential file needed for doing API requests, this is installed together with the `cleanup.ps1` script. The file is named in this way: `Credentials_USERNAME_COMPUTERNAME.xml`. This is because of the way powershell creates and stores securestrings, this way you know what user created the creadential on which server.
 
@@ -57,3 +57,15 @@ The last part is creating the scheduled task for the cleanup script. The task is
 - Trigger Daily at 01:00.
 - Execution time will not exceed 1 hour.
 - Ran by user NT AUTHORITY\SYSTEM with highest priviledges
+
+## Files ##
+
+- `cleanup.ps1`
+  - This is the script that will be ran by the task, this script does an API call to fetch all flagged users, then deletes the folders based on the username. After all folders for that user is deleted, it sends a DELETE request to the API.
+- `createCredentials.ps1`
+  - This is pretty much what its named, it will take the credentials provided when installing and create a credential file based on that. It will name the file with the username and the computername of which it was ran.
+    - Example: `Credentials_user1_server01.xml`
+- `install.ps1`
+  - This file is described above.
+- `newServer.ps1`
+  - This script adds a server to the API by POST-ing the environment computername. It uses the credentials made during the install.
