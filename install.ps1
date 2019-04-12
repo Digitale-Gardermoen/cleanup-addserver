@@ -79,7 +79,8 @@ Write-Host "Adding server to the API"
 # create a scehduled task that runs the cleanup script
 Write-Host "creating scheduled task"
 try {
-  $action = New-ScheduledTaskAction -Execute "Powershell.exe" -Argument "$($localPath)\cleanup.ps1 -ExecutionPolicy Bypass"
+  $Error.Clear()
+  $action = New-ScheduledTaskAction -Execute "Powershell.exe" -Argument ".\cleanup.ps1 -ExecutionPolicy Bypass" -WorkingDirectory "$($localPath)"
   $trigger = New-ScheduledTaskTrigger -Daily -At '01:00' # this is currently hardcoded as i dont want to create a function that checks the wanted trigger
   $principal = New-ScheduledTaskPrincipal "$($env:USERDOMAIN)\$($env:USERNAME)"
   $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 1)
@@ -91,13 +92,11 @@ try {
   Register-ScheduledTask `
     -TaskName "cleanup" `
     -InputObject $task `
-    -User "NT AUTHORITY\SYSTEM" `
     -RunLevel 'Highest' `
     -Force `
-    -ErrorAction Stop `
-    -ErrorVariable taskerror
+    -ErrorAction Stop
 }
 catch {
   Write-Host "caught error while setting up task"
-  Write-Host $taskerror
+  Write-Host $Error
 }
