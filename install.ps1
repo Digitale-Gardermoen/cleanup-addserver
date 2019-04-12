@@ -1,9 +1,10 @@
 param (
-  [String]$localPath,
-  [String]$sharePath,
-  [String]$aUser,
-  [String]$aPass,
-  [String]$apiURL
+  [string]$localPath,
+  [string]$sharePath,
+  [string]$aUser,
+  [string]$aPass,
+  [string]$apiURL,
+  [string]$curPass
 )
 # this script is for installing a new server into the solution
 # run this with the user that is intended to run the cleanup script
@@ -28,6 +29,10 @@ if (!$apiURL) {
 if ((!$aUser) -or (!$aPass)) {
   $aUser = Read-Host "Input API username"
   $aPass = Read-Host "Input API password"
+}
+
+if (!$curPass) {
+  $curPass = Read-Host "Input $($env:USERNAME)'s password"
 }
 
 # move files to a new folder located on the root
@@ -81,18 +86,18 @@ Write-Host "creating scheduled task"
 try {
   $Error.Clear()
   $action = New-ScheduledTaskAction -Execute "Powershell.exe" -Argument ".\cleanup.ps1 -ExecutionPolicy Bypass" -WorkingDirectory "$($localPath)"
-  $trigger = New-ScheduledTaskTrigger -Daily -At '01:00' # this is currently hardcoded as i dont want to create a function that checks the wanted trigger
-  $principal = New-ScheduledTaskPrincipal "$($env:USERDOMAIN)\$($env:USERNAME)"
-  $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 1)
+  $trigger = New-ScheduledTaskTrigger -Daily -At 1am # this is currently hardcoded as i dont want to create a function that checks the wanted trigger
+  $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 1).Hours
   $task = New-ScheduledTask `
     -Action $action `
-    -Principal $principal `
     -Trigger $trigger `
     -Settings $settings
   Register-ScheduledTask `
     -TaskName "cleanup" `
+    -User "$($env:USERDOMAIN)\$($env:USERNAME)" `
+    -Password $curPass `
+    -RunLevel Highest `
     -InputObject $task `
-    -RunLevel 'Highest' `
     -Force `
     -ErrorAction Stop
 }
