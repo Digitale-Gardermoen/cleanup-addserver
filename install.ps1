@@ -87,14 +87,15 @@ try {
   $Error.Clear()
   $action = New-ScheduledTaskAction -Execute "Powershell.exe" -Argument ".\cleanup.ps1 -ExecutionPolicy Bypass" -WorkingDirectory "$($localPath)"
   $trigger = New-ScheduledTaskTrigger -Daily -At 1am # this is currently hardcoded as i dont want to create a function that checks the wanted trigger
+  $principal = New-ScheduledTaskPrincipal -UserId "$($env:USERDOMAIN)\$($env:USERNAME)" -LogonType Password -RunLevel Highest
   $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 1).Hours
   $task = New-ScheduledTask `
     -Action $action `
+    -Principal $principal `
     -Trigger $trigger `
     -Settings $settings
   Register-ScheduledTask `
     -TaskName "cleanup" `
-    -User "$($env:USERDOMAIN)\$($env:USERNAME)" `
     -Password $curPass `
     -RunLevel Highest `
     -InputObject $task `
