@@ -51,7 +51,7 @@ Then it will create the credential file needed for doing API requests, this is i
 
 After this the first API call will be made to add the server to the serverlist. Be sure that the port used for the api is open between the server and the API.
 
-The last part is creating the scheduled task for the cleanup script. The task is setup with these defaults:
+Then it will create the scheduled task for the cleanup script. The task is setup with these defaults:
 
 - ExecutionPolicy Bypass (when running script).
 - Trigger Daily at 01:00.
@@ -69,3 +69,5 @@ The last part is creating the scheduled task for the cleanup script. The task is
   - This file is described above.
 - `newServer.ps1`
   - This script adds a server to the API by POST-ing the environment computername. It uses the credentials made during the install.
+
+The last part is setting up a new eventlog, this eventlog is called "Cleanup" and only got one source (Cleanup script)
