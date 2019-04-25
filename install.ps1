@@ -99,3 +99,13 @@ catch {
   Write-Host "caught error while setting up task"
   Write-Host $Error
 }
+
+# create an eventlog for the cleanup script to write to
+Write-Host "creating event log"
+try {
+  New-EventLog -LogName "Cleanup" -Source "Cleanup script" -ErrorAction Stop -ErrorVariable eventError
+}
+catch {
+  Write-Host "caught error while setting up event log"
+  Write-Host $eventError
+}
