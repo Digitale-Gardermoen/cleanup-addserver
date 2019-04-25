@@ -31,6 +31,20 @@ if (!$path) {
   $path = $config.share
 }
 
+function writeLog {
+  param(
+    [int]$eid,
+    [string]$entry,
+    [string]$msg
+  )
+  Write-EventLog -LogName "Cleanup" `
+    -Source "Cleanup script" `
+    -EventId $eid `
+    -EntryType $entry `
+    -RawData 10, 20 `
+    -Message $msg
+}
+
 $uri = "$($config.url)/fetch/$($env:COMPUTERNAME)"
 
 $result = Invoke-RestMethod -Uri $uri -Credential $cred
@@ -54,6 +68,7 @@ $result | ForEach-Object {
       catch {
         if ($folderError) {
           Write-Host $folderError
+          writeLog -eid 1000 -entry "Error" -msg $folderError
         }
       }
     }
@@ -69,6 +84,7 @@ $result | ForEach-Object {
     catch {
       if ($restError) {
         Write-Host $restError
+        writeLog -eid 2000 -entry "Error" -msg $restError
       }
     }
   }
