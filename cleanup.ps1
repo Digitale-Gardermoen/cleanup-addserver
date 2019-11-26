@@ -1,4 +1,15 @@
-﻿param (
+﻿<#
+  .SYNOPSIS
+    Cleanup script for deleting user based folder from a share
+  .DESCRIPTION
+    This script contacts the cleanup API and removes folders based on username from the provided share.
+    It will fetch users from the API, delete the folders, then remove users from the API one-by-one.
+  .PARAMETER path
+    Optional path parameter for what share to perform the script action in
+  #>
+[CmdletBinding()]
+param (
+  [Parameter(Mandatory = $false)]
   [String]$path
 )
 
@@ -16,7 +27,7 @@ catch {
 
 try {
   $config = Get-Content -Path '.\config.json' -ErrorAction Stop -ErrorVariable configError
-  $config = ($config|ConvertFrom-Json)
+  $config = ($config | ConvertFrom-Json)
 }
 catch {
   Write-host "Error getting config file"
@@ -32,9 +43,32 @@ if (!$path) {
 }
 
 function writeLog {
+  <#
+  .SYNOPSIS
+    Creates an entry in the windows log.
+    The log is created with the install script
+  .DESCRIPTION
+    Creates an entry in the windows log.
+    The log is created with the install script
+  .PARAMETER eid
+    The event ID for the new entry.
+  .PARAMETER entry
+    The Entry Type for the new entry.
+  .PARAMETER msg
+    The message to set in the event log.
+  .EXAMPLE
+    writeLog -eid 1000 -entry "Error" -msg "error message"
+  #>
+  [CmdletBinding()]
   param(
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullorEmpty()]
     [int]$eid,
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullorEmpty()]
     [string]$entry,
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullorEmpty()]
     [string]$msg
   )
   Write-EventLog -LogName "Cleanup" `
