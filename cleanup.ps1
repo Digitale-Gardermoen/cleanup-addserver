@@ -63,15 +63,26 @@ $result | ForEach-Object {
     $folders = Get-ChildItem -Path $path -Force | Where-Object { $($_.Name) -like "$($user).AD*" }
     if (($folders) -and ($folders.Length -gt 0)) {
       try {
-        $folders | Remove-Item -Force -Recurse -ErrorAction Stop -ErrorVariable folderError
+        $folders | Remove-Item -Force -Recurse -ErrorAction Stop
       }
       catch {
+        if ($_.Exception.Message -match "$user") {
+          writeLog -eid 5000 -entry "Information" -msg "Got an Access error, trying to take ownership and resetting the security settings. Folders: `n$($folders.Name)"
+    
+           ForEach ($folder in $folders) {
+             Invoke-Expression -Command ('TAKEOWN /f ' + "$($folder.FullName)" + ' /a /r /d Y')
+             Invoke-Expression -Command ('ICACLS ' + "$($folder.FullName)" + ' /reset /T')
+           }
+
+           $folders | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue -ErrorVariable folderError
+        }
         if ($folderError) {
           Write-Host $folderError
           writeLog -eid 1000 -entry "Error" -msg $folderError
         }
       }
     }
+
     try {
       $deleteUri = "$($config.url)/deleteone/$($env:COMPUTERNAME)/$($user)"
       Invoke-RestMethod `
