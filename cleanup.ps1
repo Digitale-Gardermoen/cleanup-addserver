@@ -79,6 +79,9 @@ function writeLog {
     -Message $msg
 }
 
+# Force TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 $uri = "$($config.url)/fetch/$($env:COMPUTERNAME)"
 
 $result = Invoke-RestMethod -Uri $uri -Credential $cred
